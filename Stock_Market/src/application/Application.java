@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 
 import data.HistoricalData;
+import data.Stats;
 
 /**
  * @author Dimas Moosa
@@ -24,21 +25,13 @@ public class Application {
 		 //return info to user
 		
 		HistoricalData hd = new HistoricalData(); //instantiate HistoricalData object
+		Stats stats = new Stats();
 
 		
 		//try to call method that retrieves the closing prices
 		try {
-			LocalDate[] temp0 = hd.getDate("AAPL", 5); 
-			double[] temp = hd.getAdjClosePrice("AAPL", 5);
-			temp0[2].getDayOfWeek().toString();
-			
-			for(int i = 0; i < temp0.length; i++) {	
-				System.out.println(i + ": " + temp0[i]);
-			}
-			
-			for(int i = 0; i < temp.length; i++) {
-				System.out.println(i + ": " + temp[i]);
-			}
+			double average = stats.getAverageWeeklyMovement("AAPL", 2);
+			System.out.println(average);
 			
 		} 
 		catch (IOException e) {

@@ -33,7 +33,7 @@ public class HistoricalData {
 	/**
 	 * A method that retrieves the last X amount of dates for a ticker that the user specified
 	 * 
-	 * @param The ticker symbol
+	 * @param The ticker symbol of the stock/ETF/etc.
 	 * @param The amount of trading days the user wants dates for (Amount = from now to X trading days ago)
 	 * @return An array of LocalDate objects 
 	 * @throws IOException
@@ -171,7 +171,7 @@ public class HistoricalData {
 		
 		//if the reponse url is different than the one constructed, that means it's a redirect and that the ticker is probably wrong
 		if(!matches) {
-			System.out.println("Could not connect to the web page. Please make sure the ticker symbol is valid.");
+			System.out.println("Could not connect to the web page. Please make sure the ticker symbol is valid.\n");
 			System.exit(0); //exit out of method if wrong input
 		}
 		
@@ -189,8 +189,7 @@ public class HistoricalData {
 		//System.out.println("rows: " + rows.toString());
 		
 		if(amount > rows.size()) {
-			System.out.print("Sorry, the amount you requested is greater than the amount available. "
-					+ "We were only able to get " + rows.size() + " records for " + ticker + ". ");
+			System.out.print("Sorry, the amount you requested is greater than the amount available. ");
 			
 			adjClose = new double[rows.size()]; //instantiate the array to size of the rows available
 			
@@ -224,7 +223,6 @@ public class HistoricalData {
 		
 		else if (amount <= rows.size()) {
 			//this retrieves the latest amount 
-			System.out.print("Retrieving latest " + amount + " adjusted closing prices for " + ticker + ". ");
 			adjClose = new double[amount]; //instantiate array to amount requested
 			
 			for(int i = 0; i < amount; i++) { //iterate over amount of rows asked for
@@ -265,7 +263,7 @@ public class HistoricalData {
 			//System.out.println(adjClose[i]);
 		}
 		
-		System.out.println("Done retrieving.");
+		System.out.println("Done retrieving latest " + amount + " adjusted closing prices for " + ticker + ".\n");
 		
 		//return the double array of the adjusted close prices
 		return adjClose;
