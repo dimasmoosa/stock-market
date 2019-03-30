@@ -15,7 +15,12 @@ import org.jsoup.select.Elements;
 public class HistoricalData {
 	
 	
-	//get yahoo finance historical data url for a specified ticker
+	/**
+	 * A method that retrieves the Yahoo Finance URL for the specified ticker 
+	 * 
+	 * @param A ticker symbol.
+	 * @return The Yahoo Finance URL in a String data type
+	 */
 	private String getURL(String ticker) {
 		String urlPartOne = "https://finance.yahoo.com/quote/"; //first part of url
 		String urlPartTwo = "/history?p="; //second part of url
@@ -25,7 +30,15 @@ public class HistoricalData {
 		return url; //return the url
 	}
 	
-	//returns the dates requested for the ticker
+	/**
+	 * A method that retrieves the last X amount of dates for a ticker that the user specified
+	 * 
+	 * @param The ticker symbol
+	 * @param The amount of trading days the user wants dates for (Amount = from now to X trading days ago)
+	 * @return An array of LocalDate objects 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
 	public LocalDate[] getDate(String ticker, int amount) throws IOException, ParseException {
 		LocalDate dates[];
 		ArrayList<String> stringArrayList = new ArrayList<>();
@@ -57,8 +70,8 @@ public class HistoricalData {
 		//System.out.println("rows: " + rows.toString());
 		
 		if(amount > rows.size()) { //if amount asked for is greater than rows available, let user know and then retrieve max amount of records
-			System.out.println("Sorry, the amount you requested is greater than the amount available. "
-					+ "We were only able to get " + rows.size() + " records for " + ticker + ".");
+			System.out.print("Sorry, the amount you requested is greater than the amount available. "
+					+ "We were only able to get " + rows.size() + " records for " + ticker + ". ");
 			
 			for(int i = 0; i < rows.size(); i++) {
 				Element row = rows.get(i); //get the row
@@ -86,7 +99,7 @@ public class HistoricalData {
 		}
 		
 		else if (amount <= rows.size()) {
-			System.out.println("Retrieving latest " + amount + " dates for " + ticker + ".");
+			System.out.print("Retrieving latest " + amount + " dates for " + ticker + ". ");
 			
 			for(int i = 0; i < amount; i++) {
 				Element row = rows.get(i);
@@ -127,15 +140,24 @@ public class HistoricalData {
 			String dateString = stringArrayList.get(i);
 			LocalDate date = LocalDate.parse(dateString, formatter);
 			dates[i] = date;
-			System.out.println(date);
+			//System.out.println(date);
 			//date.format(formatter) <-- if we wanted to convert back to string with the same format
 		}
+		
+		System.out.println("Done retrieving.");
 		
 		return dates;
 	}
 	
 	
-	//get the latest adjusted closing prices for the last specified amount of days
+	/**
+	 * A method that retrieves the closing prices for the specified amount of trading days and specified ticker
+	 * 
+	 * @param The ticker symbol
+	 * @param The amount of trading days the user wants closing prices for (Amount = from now to X trading days ago)
+	 * @return An array of type double 
+	 * @throws IOException
+	 */
 	public double[] getAdjClosePrice(String ticker, int amount) throws IOException {
 		double[] adjClose;
 		ArrayList<String> stringArrayList = new ArrayList<>();
@@ -167,8 +189,8 @@ public class HistoricalData {
 		//System.out.println("rows: " + rows.toString());
 		
 		if(amount > rows.size()) {
-			System.out.println("Sorry, the amount you requested is greater than the amount available. "
-					+ "We were only able to get " + rows.size() + " records for " + ticker + ".");
+			System.out.print("Sorry, the amount you requested is greater than the amount available. "
+					+ "We were only able to get " + rows.size() + " records for " + ticker + ". ");
 			
 			adjClose = new double[rows.size()]; //instantiate the array to size of the rows available
 			
@@ -202,7 +224,7 @@ public class HistoricalData {
 		
 		else if (amount <= rows.size()) {
 			//this retrieves the latest amount 
-			System.out.println("Retrieving latest " + amount + " adjusted closing prices for " + ticker + ".");
+			System.out.print("Retrieving latest " + amount + " adjusted closing prices for " + ticker + ". ");
 			adjClose = new double[amount]; //instantiate array to amount requested
 			
 			for(int i = 0; i < amount; i++) { //iterate over amount of rows asked for
@@ -240,10 +262,10 @@ public class HistoricalData {
 		//convert the strings to Double objects then double and assign it to our double array
 		for(int i = 0; i < stringArrayList.size(); i++) {
 			adjClose[i] = Double.parseDouble(stringArrayList.get(i));
-			System.out.println(adjClose[i]);
+			//System.out.println(adjClose[i]);
 		}
 		
-		
+		System.out.println("Done retrieving.");
 		
 		//return the double array of the adjusted close prices
 		return adjClose;
