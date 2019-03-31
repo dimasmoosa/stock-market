@@ -30,7 +30,7 @@ public class Application {
 		
 		//try to call method that retrieves the closing prices
 		try {
-			double average = stats.getAverageWeeklyMovement("AAPL", 2);
+			double average = stats.getAverageWeeklyMovement("AAPL", 8);
 			System.out.println(average);
 			
 		} 

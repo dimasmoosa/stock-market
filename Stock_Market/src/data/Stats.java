@@ -21,7 +21,7 @@ public class Stats {
 	 * @throws IOException 
 	 */
 	public double getAverageWeeklyMovement(String ticker, int weeks) throws IOException, ParseException {
-		double avg = 0; //the average weekly movement
+		double avg; //the average weekly movement
 		DecimalFormat df = new DecimalFormat("#.00"); //this can be used to round our average to two decimal places
 		double[] prices; //array containing the last X prices
 		double fridayClose; //Friday close
@@ -42,6 +42,7 @@ public class Stats {
 		
 		//instantiate the HistoricalData class so we can use its methods
 		HistoricalData hd = new HistoricalData();
+
 		
 		switch(currentDayOfWeekString) {
 		
@@ -49,8 +50,15 @@ public class Stats {
 			case "SUNDAY": offset = 0; 
 			//instantiate the LocalDate[] objects after we get the max amount of days we need to cover the amount of weeks the user is asking for
 			prices = hd.getAdjClosePrice(ticker, days + offset); 
-			for(int i = offset; i < days; i += 5 ) { //increment by 5 at end to get next week
+			if(days + offset > prices.length) {
+				weeks = prices.length / 5;
+				System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+			}
+			for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
 				fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+				if(i + 4 >= prices.length) {
+					break;
+				}
 				mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
 				weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
 				allWeeklyDifference.add(weeklyDifference); //add the difference to the difference array list in case we ever want to use it
@@ -61,24 +69,43 @@ public class Stats {
 			break;
 			
 			case "SATURDAY": offset = 0; //see above
-			prices = hd.getAdjClosePrice(ticker, days + offset);
-			for(int i = offset; i < days; i += 5 ) { //increment by 5 at end to get next week
-				fridayClose = prices[i]; //get Friday close price... which will be at the offset index
-				mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
-				weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
-				allWeeklyDifference.add(weeklyDifference); //add the difference to the difference array list in case we ever want to use it
-				weeklyMovement = (weeklyDifference / mondayClose) * 100; //the movement amount in a percentage
-				allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
+			prices = hd.getAdjClosePrice(ticker, days + offset); 
+			//sometimes we can't get the amount of weeks requested because of the way the historical data class is set up
+			//it's due to some rows not having the adjusted closing price which reduces the length of the array
+			//this is why prices.length is used in the for loop.
+			//this message lets the user know we were only able to get X amount of rows
+			if(days + offset > prices.length) {
+				weeks = prices.length / 5;
+				System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+			}
+			for(int i = offset; i < prices.length; i += 5) { 
+				fridayClose = prices[i]; 
+				if(i + 4 >= prices.length) { //break out of loop if we reach scenario mentioned in above if statement
+					break;
+				}
+				mondayClose = prices[i+4]; 
+				weeklyDifference = fridayClose - mondayClose; 
+				allWeeklyDifference.add(weeklyDifference); 
+				weeklyMovement = (weeklyDifference / mondayClose) * 100; 
+				allWeeklyMovement.add(weeklyMovement); 
+				
 				
 			}
 			break;
 			
 			case "FRIDAY": offset = 0; //if today is Friday, then we can start counting the weeks from today to last Monday and so on
-			System.out.println("Note: if the market is still open (closes at 4:30 PM on regular trading days), "
+			System.out.println("Note: If the market is still open (closes at 4:30 PM on regular trading days), "
 					+ "the closing price will change by market close so that means the weekly movement will be off by a bit");
 			prices = hd.getAdjClosePrice(ticker, days + offset);
-			for(int i = offset; i < days; i += 5 ) { //increment by 5 at end to get next week
+			if(days + offset > prices.length) {
+				weeks = prices.length / 5;
+				System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+			}
+			for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
 				fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+				if(i + 4 >= prices.length) {
+					break;
+				}
 				mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
 				weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
 				allWeeklyDifference.add(weeklyDifference); //add the difference to the difference array list in case we ever want to use it
@@ -92,8 +119,15 @@ public class Stats {
 			//Have to traverse to last week (starting from last Friday)... will be last Friday - Monday of that week... and so on
 			case "THURSDAY": offset = 4; 
 			prices = hd.getAdjClosePrice(ticker, days + offset);
-			for(int i = offset; i < days; i += 5 ) { //increment by 5 at end to get next week
+			if(days + offset > prices.length) {
+				weeks = prices.length / 5;
+				System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+			}
+			for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
 				fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+				if(i + 4 >= prices.length) {
+					break;
+				}
 				mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
 				weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
 				allWeeklyDifference.add(weeklyDifference); //add the difference to the difference array list in case we ever want to use it
@@ -105,8 +139,15 @@ public class Stats {
 			
 			case "WEDNESDAY": offset = 3; //Wednesday to last Friday = 3 days... you get the point
 			prices = hd.getAdjClosePrice(ticker, days + offset);
-			for(int i = offset; i < days; i += 5 ) { //increment by 5 at end to get next week
+			if(days + offset > prices.length) {
+				weeks = prices.length / 5;
+				System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+			}
+			for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
 				fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+				if(i + 4 >= prices.length) {
+					break;
+				}
 				mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
 				weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
 				allWeeklyDifference.add(weeklyDifference); //add the difference to the difference array list in case we ever want to use it
@@ -118,8 +159,15 @@ public class Stats {
 			
 			case "TUESDAY": offset = 2;
 			prices = hd.getAdjClosePrice(ticker, days + offset);
-			for(int i = offset; i < days; i += 5 ) { //increment by 5 at end to get next week
+			if(days + offset > prices.length) {
+				weeks = prices.length / 5;
+				System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+			}
+			for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
 				fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+				if(i + 4 >= prices.length) {
+					break;
+				}
 				mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
 				weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
 				allWeeklyDifference.add(weeklyDifference); //add the difference to the difference array list in case we ever want to use it
@@ -131,8 +179,15 @@ public class Stats {
 			
 			case "MONDAY": offset = 1;
 			prices = hd.getAdjClosePrice(ticker, days + offset);
-			for(int i = offset; i < days; i += 5 ) { //increment by 5 at end to get next week
+			if(days + offset > prices.length) {
+				weeks = prices.length / 5;
+				System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+			}
+			for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
 				fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+				if(i + 4 >= prices.length) {
+					break;
+				}
 				mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
 				weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
 				allWeeklyDifference.add(weeklyDifference); //add the difference to the difference array list in case we ever want to use it
@@ -144,7 +199,7 @@ public class Stats {
 		
 		}
 		
-		System.out.println("DISCLAIMER: if there are any holidays/off days during the trading week, the average weekly movement will be inaccurate. "
+		System.out.println("DISCLAIMER: If there are any holidays/off days during the trading week, the average weekly movement will be inaccurate. "
 				+ "\nThis is due to the nature of the way this method works, which takes into account the Friday and Monday closing prices. "
 				+ "\nThis means any days off during that week will affect the calculation by offsetting the week depending on how many days "
 				+ "the markets were closed. \nFor example, if the market is closed Wednesday, the method will return the last Friday to prior Tuesday "
@@ -163,6 +218,15 @@ public class Stats {
 		
 		return avg;
 	}	
+	
+	
+	public double getSuccessRate(String ticker, int weeks) {
+		double successRate = 0;
+		
+		
+		
+		return successRate;
+	}
 	
 
 }

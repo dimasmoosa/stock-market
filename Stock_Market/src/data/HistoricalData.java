@@ -72,6 +72,7 @@ public class HistoricalData {
 		if(amount > rows.size()) { //if amount asked for is greater than rows available, let user know and then retrieve max amount of records
 			System.out.print("Sorry, the amount you requested is greater than the amount available. "
 					+ "We were only able to get " + rows.size() + " records for " + ticker + ". ");
+			amount = rows.size();
 			
 			for(int i = 0; i < rows.size(); i++) {
 				Element row = rows.get(i); //get the row
@@ -190,6 +191,7 @@ public class HistoricalData {
 		
 		if(amount > rows.size()) {
 			System.out.print("Sorry, the amount you requested is greater than the amount available. ");
+			amount = rows.size();
 			
 			adjClose = new double[rows.size()]; //instantiate the array to size of the rows available
 			
