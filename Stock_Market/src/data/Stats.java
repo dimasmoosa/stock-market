@@ -207,7 +207,8 @@ public class Stats {
 		
 		//iterate over all the weekly movement, add them up to get the sum
 		for(int i = 0; i < allWeeklyMovement.size(); i++) {
-			weeklyMovementSum += allWeeklyMovement.get(i).doubleValue(); //get the double value of Double object at index i...
+			//get the double value of Double object at index i... get its absolute value so we can get the accurate movement
+			weeklyMovementSum += Math.abs(allWeeklyMovement.get(i).doubleValue()); 
 		}
 		
 		avg = weeklyMovementSum / allWeeklyMovement.size(); // divide the sum by the amount of weeks to get the average
