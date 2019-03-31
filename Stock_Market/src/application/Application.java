@@ -27,10 +27,8 @@ public class Application {
 		Stats stats = new Stats();
 
 		
-		//try to call method that retrieves the closing prices
 		try {
-			double average = stats.getAverageWeeklyMovement("AAPL", 8);
-			System.out.println(average);
+			double success = stats.getSuccessRate("AAPL", 10, 3);
 			
 		} 
 		catch (IOException e) {
