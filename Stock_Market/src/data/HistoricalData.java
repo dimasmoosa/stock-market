@@ -59,103 +59,11 @@ public class HistoricalData {
 		return rows;
 		
 	}
-
 	
-	/**
-	 * A method that retrieves the last X amount of dates for a ticker that the user specified
-	 * 
-	 * @param ticker symbol of the stock/ETF/etc.
-	 * @param amount of trading days the user wants dates for (Amount = from now to X trading days ago)
-	 * @return An array of LocalDate objects 
-	 * @throws IOException
-	 * @throws ParseException
+	/*
+	 * Layout of the historical data table
+	 * date | open | high | low | close* | adj close | volume
 	 */
-	public LocalDate[] getDates(String ticker, int amount) throws IOException, ParseException {
-		LocalDate dates[];
-		ArrayList<String> stringArrayList = new ArrayList<>();
-		
-		Elements rows = getHistoricalDataRows(ticker);
-		
-		if(amount > rows.size()) { //if amount asked for is greater than rows available, let user know and then retrieve max amount of records
-			System.out.print("Sorry, the amount you requested is greater than the amount available. "
-					+ "We were only able to get " + rows.size() + " records for " + ticker + ". ");
-			amount = rows.size();
-			
-			for(int i = 0; i < rows.size(); i++) {
-				Element row = rows.get(i); //get the row
-				Elements cols = row.select("td"); //get the columns of the row
-				
-				if(cols.size() == 7) {
-					Element col = cols.get(0); //if valid row, get the 0th position column which contains the date
-					
-					//parse this column line so we can get the date... looks like the following line
-					//<td class="Py(10px) Ta(start) Pend(10px)" data-reactid="67"><span data-reactid="68">Mar 26, 2019</span></td>
-					String colValue = col.toString(); //convert column value to string and store in variable
-					
-					String[] firstSplitArray = colValue.split(">"); //split the string by >
-					String firstSplitString = firstSplitArray[2]; //get [2].. looks like "Mar 26, 2019</span"
-					
-					String[] secondSplitArray = firstSplitString.split("<"); //split into two by <
-					String secondSplitString = secondSplitArray[0]; //choose first half.. looks like "Mar 26, 2019"
-					
-					stringArrayList.add(secondSplitString);
-					
-				}
-				
-			}
-			
-		}
-		
-		else if (amount <= rows.size()) {
-			System.out.print("Retrieving latest " + amount + " dates for " + ticker + ". ");
-			
-			for(int i = 0; i < amount; i++) {
-				Element row = rows.get(i);
-				Elements cols = row.select("td");
-				
-				if(cols.size() == 7) {
-					Element col = cols.get(0); //if valid row, get the 0th position column which contains the date
-					
-					//parse this column line so we can get the date... looks like the following line
-					//<td class="Py(10px) Ta(start) Pend(10px)" data-reactid="67"><span data-reactid="68">Mar 26, 2019</span></td>
-					String colValue = col.toString(); //convert column value to string and store in variable
-					
-					String[] firstSplitArray = colValue.split(">"); //split the string by >
-					String firstSplitString = firstSplitArray[2]; //get [2].. looks like "Mar 26, 2019</span"
-					
-					String[] secondSplitArray = firstSplitString.split("<"); //split into two by <
-					String secondSplitString = secondSplitArray[0]; //choose first half.. looks like "Mar 26, 2019"
-					
-					stringArrayList.add(secondSplitString);
-					
-				}
-				
-			}
-			
-		}
-		
-		//instantiate the LocalDate array with the size of the ArrayList<String.
-		dates = new LocalDate[stringArrayList.size()]; 
-		
-		//specify the format that is used by those strings scraped from yahoo finance
-		String pattern = "MMM d, y";
-		
-		//instantiate DateTimeFormatter object with the specified pattern
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-		
-		//iterate over the values of the array list and assign each index to the LocalDate array
-		for(int i = 0; i < dates.length; i++) { 
-			String dateString = stringArrayList.get(i);
-			LocalDate date = LocalDate.parse(dateString, formatter);
-			dates[i] = date;
-			//System.out.println(date);
-			//date.format(formatter) <-- if we wanted to convert back to string with the same format
-		}
-		
-		System.out.println("Done retrieving.");
-		
-		return dates;
-	}
 	
 	
 	/**
@@ -253,6 +161,103 @@ public class HistoricalData {
 		//return the double array of the adjusted close prices
 		return adjClose;
 		
+	}
+	
+	
+	/**
+	 * A method that retrieves the last X amount of dates for a ticker that the user specified
+	 * 
+	 * @param ticker symbol of the stock/ETF/etc.
+	 * @param amount of trading days the user wants dates for (Amount = from now to X trading days ago)
+	 * @return An array of LocalDate objects 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public LocalDate[] getDates(String ticker, int amount) throws IOException, ParseException {
+		LocalDate dates[];
+		ArrayList<String> stringArrayList = new ArrayList<>();
+		
+		Elements rows = getHistoricalDataRows(ticker);
+		
+		if(amount > rows.size()) { //if amount asked for is greater than rows available, let user know and then retrieve max amount of records
+			System.out.print("Sorry, the amount you requested is greater than the amount available. "
+					+ "We were only able to get " + rows.size() + " records for " + ticker + ". ");
+			amount = rows.size();
+			
+			for(int i = 0; i < rows.size(); i++) {
+				Element row = rows.get(i); //get the row
+				Elements cols = row.select("td"); //get the columns of the row
+				
+				if(cols.size() == 7) {
+					Element col = cols.get(0); //if valid row, get the 0th position column which contains the date
+					
+					//parse this column line so we can get the date... looks like the following line
+					//<td class="Py(10px) Ta(start) Pend(10px)" data-reactid="67"><span data-reactid="68">Mar 26, 2019</span></td>
+					String colValue = col.toString(); //convert column value to string and store in variable
+					
+					String[] firstSplitArray = colValue.split(">"); //split the string by >
+					String firstSplitString = firstSplitArray[2]; //get [2].. looks like "Mar 26, 2019</span"
+					
+					String[] secondSplitArray = firstSplitString.split("<"); //split into two by <
+					String secondSplitString = secondSplitArray[0]; //choose first half.. looks like "Mar 26, 2019"
+					
+					stringArrayList.add(secondSplitString);
+					
+				}
+				
+			}
+			
+		}
+		
+		else if (amount <= rows.size()) {
+			System.out.print("Retrieving latest " + amount + " dates for " + ticker + ". ");
+			
+			for(int i = 0; i < amount; i++) {
+				Element row = rows.get(i);
+				Elements cols = row.select("td");
+				
+				if(cols.size() == 7) {
+					Element col = cols.get(0); //if valid row, get the 0th position column which contains the date
+					
+					//parse this column line so we can get the date... looks like the following line
+					//<td class="Py(10px) Ta(start) Pend(10px)" data-reactid="67"><span data-reactid="68">Mar 26, 2019</span></td>
+					String colValue = col.toString(); //convert column value to string and store in variable
+					
+					String[] firstSplitArray = colValue.split(">"); //split the string by >
+					String firstSplitString = firstSplitArray[2]; //get [2].. looks like "Mar 26, 2019</span"
+					
+					String[] secondSplitArray = firstSplitString.split("<"); //split into two by <
+					String secondSplitString = secondSplitArray[0]; //choose first half.. looks like "Mar 26, 2019"
+					
+					stringArrayList.add(secondSplitString);
+					
+				}
+				
+			}
+			
+		}
+		
+		//instantiate the LocalDate array with the size of the ArrayList<String.
+		dates = new LocalDate[stringArrayList.size()]; 
+		
+		//specify the format that is used by those strings scraped from yahoo finance
+		String pattern = "MMM d, y";
+		
+		//instantiate DateTimeFormatter object with the specified pattern
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+		
+		//iterate over the values of the array list and assign each index to the LocalDate array
+		for(int i = 0; i < dates.length; i++) { 
+			String dateString = stringArrayList.get(i);
+			LocalDate date = LocalDate.parse(dateString, formatter);
+			dates[i] = date;
+			//System.out.println(date);
+			//date.format(formatter) <-- if we wanted to convert back to string with the same format
+		}
+		
+		System.out.println("Done retrieving.");
+		
+		return dates;
 	}
 
 }

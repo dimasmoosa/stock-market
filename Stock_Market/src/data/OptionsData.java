@@ -10,7 +10,7 @@ import org.jsoup.select.Elements;
 public class OptionsData {
 	
 	/**
-	 * A method to get the URL for options data on a specified ticker
+	 * A method to get the Yahoo Finance URL for options data on a specified ticker
 	 * 
 	 * @param ticker String
 	 * @return URL String
@@ -24,6 +24,12 @@ public class OptionsData {
 		return url;
 	}
 	
+	/**
+	 * 
+	 * @param ticker of the stock/ETF
+	 * @return rows of the calls contracts table
+	 * @throws IOException
+	 */
 	private Elements getCallsRows(String ticker) throws IOException {
 		Elements callsRows;
 		String url = getOptionsDataURL(ticker);
@@ -39,6 +45,12 @@ public class OptionsData {
 		return callsRows;
 	}
 	
+	/**
+	 * 
+	 * @param ticker of the stock/ETF
+	 * @return rows of the puts contracts table
+	 * @throws IOException
+	 */
 	private Elements getPutsRows(String ticker) throws IOException {
 		Elements putsRows;
 		String url = getOptionsDataURL(ticker);
@@ -54,7 +66,10 @@ public class OptionsData {
 		return putsRows;
 	}
 	
-	
+	/*
+	 * Layout of the options tables
+	 * contract name | last trade date | strike | last price | bid | ask | change | % change | volume | open interest | implied volatility 
+	 */
 	
 
 }
