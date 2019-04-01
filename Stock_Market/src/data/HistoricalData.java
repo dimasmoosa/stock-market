@@ -30,20 +30,6 @@ public class HistoricalData {
 		return url; //return the url
 	}
 	
-	/**
-	 * A method to get the URL for options data on a specified ticker
-	 * 
-	 * @param ticker String
-	 * @return URL String
-	 */
-	private String getOptionsDataURL(String ticker) {
-		String urlPartOne = "https://finance.yahoo.com/quote/";
-		String urlPartTwo = "/options?p=";
-		
-		String url = urlPartOne + ticker + urlPartTwo + ticker;
-		
-		return url;
-	}
 
 	/**
 	 * A method that retrieves the rows of a historical data page on Yahoo Finance
