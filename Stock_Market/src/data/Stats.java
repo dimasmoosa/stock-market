@@ -431,13 +431,13 @@ public class Stats {
 	}
 	
 	
-	//create method for positive successRate (staying within +X%)
+	//create method for positive movement successRate (staying within +X%)
 //	public double getNegativeSuccessRate() {
 //		
 //	}
 	
 	
-	//create method for negative successRate (staying within -X%)
+	//create method for negative movement successRate (staying within -X%)
 //	public double getPositiveSuccessRate(){
 //		
 //	}

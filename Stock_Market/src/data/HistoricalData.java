@@ -16,12 +16,12 @@ public class HistoricalData {
 	
 	
 	/**
-	 * A method that retrieves the Yahoo Finance URL for the specified ticker 
+	 * A method that retrieves the Yahoo Finance historical data URL for the specified ticker 
 	 * 
-	 * @param A ticker symbol.
-	 * @return The Yahoo Finance URL in a String data type
+	 * @param String ticker
+	 * @return String url
 	 */
-	private String getURL(String ticker) {
+	private String getHistoricalDataURL(String ticker) {
 		String urlPartOne = "https://finance.yahoo.com/quote/"; //first part of url
 		String urlPartTwo = "/history?p="; //second part of url
 		
@@ -29,10 +29,31 @@ public class HistoricalData {
 		
 		return url; //return the url
 	}
-
 	
-	private Elements getHistoricalDataRows(String ticker, String url) throws IOException {
-		url = getURL(ticker); //get the URL
+	/**
+	 * A method to get the URL for options data on a specified ticker
+	 * 
+	 * @param ticker String
+	 * @return URL String
+	 */
+	private String getOptionsDataURL(String ticker) {
+		String urlPartOne = "https://finance.yahoo.com/quote/";
+		String urlPartTwo = "/options?p=";
+		
+		String url = urlPartOne + ticker + urlPartTwo + ticker;
+		
+		return url;
+	}
+
+	/**
+	 * A method that retrieves the rows of a historical data page on Yahoo Finance
+	 * 
+	 * @param ticker of the stock/ETF
+	 * @return Elements rows
+	 * @throws IOException
+	 */
+	private Elements getHistoricalDataRows(String ticker) throws IOException {
+		String url = getHistoricalDataURL(ticker); //get the URL
 		Response response = Jsoup.connect(url).followRedirects(true).execute(); //get the reponse of the URL
 		String urlResponse = response.url().toString(); //store the reponse in a string
 		
@@ -57,17 +78,17 @@ public class HistoricalData {
 	/**
 	 * A method that retrieves the last X amount of dates for a ticker that the user specified
 	 * 
-	 * @param The ticker symbol of the stock/ETF/etc.
-	 * @param The amount of trading days the user wants dates for (Amount = from now to X trading days ago)
+	 * @param ticker symbol of the stock/ETF/etc.
+	 * @param amount of trading days the user wants dates for (Amount = from now to X trading days ago)
 	 * @return An array of LocalDate objects 
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public LocalDate[] getDate(String ticker, int amount) throws IOException, ParseException {
+	public LocalDate[] getDates(String ticker, int amount) throws IOException, ParseException {
 		LocalDate dates[];
 		ArrayList<String> stringArrayList = new ArrayList<>();
 		
-		Elements rows = getHistoricalDataRows(ticker, getURL(ticker));
+		Elements rows = getHistoricalDataRows(ticker);
 		
 		if(amount > rows.size()) { //if amount asked for is greater than rows available, let user know and then retrieve max amount of records
 			System.out.print("Sorry, the amount you requested is greater than the amount available. "
@@ -163,7 +184,7 @@ public class HistoricalData {
 		double[] adjClose;
 		ArrayList<String> stringArrayList = new ArrayList<>();
 		
-		Elements rows = getHistoricalDataRows(ticker, getURL(ticker));
+		Elements rows = getHistoricalDataRows(ticker);
 		
 		if(amount > rows.size()) {
 			System.out.print("Sorry, the amount you requested is greater than the amount available. ");
