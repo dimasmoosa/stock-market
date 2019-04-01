@@ -29,6 +29,30 @@ public class HistoricalData {
 		
 		return url; //return the url
 	}
+
+	
+	private Elements getHistoricalDataRows(String ticker, String url) throws IOException {
+		url = getURL(ticker); //get the URL
+		Response response = Jsoup.connect(url).followRedirects(true).execute(); //get the reponse of the URL
+		String urlResponse = response.url().toString(); //store the reponse in a string
+		
+		boolean matches = url.equals(urlResponse); //does the URL match the response we get? store that value in a boolean
+		
+		//if the response doesn't match the URL we specified, that means it's a redirect and the ticker is probably wrong or something else
+		if(!matches) {
+			System.out.println("The web page requested hit a redirect. Please make sure the ticker symbol is valid.");
+			System.exit(0); //close the method... exit
+		}
+		
+		Document doc = Jsoup.connect(url).timeout(10000).get(); //get the HTML document from the URL
+		
+		//select the rows of table. table > tbody > tr is the structure. table and tbody are "Element" objects while tr is an "Elements" object
+		Elements rows = doc.select("table tbody tr"); 
+		
+		return rows;
+		
+	}
+
 	
 	/**
 	 * A method that retrieves the last X amount of dates for a ticker that the user specified
@@ -43,31 +67,7 @@ public class HistoricalData {
 		LocalDate dates[];
 		ArrayList<String> stringArrayList = new ArrayList<>();
 		
-		//validate that the ticker is correct by making sure the user lands on the URL constructed
-		String url = getURL(ticker); //url constructed
-		Response response = Jsoup.connect(url).followRedirects(true).execute(); //response we get when trying to connect to url constructed
-		String urlResponse = response.url().toString(); //store the response in a string
-		
-		boolean matches = url.equals(urlResponse); //assign the value of whether the two strings match to a boolean variable
-		
-		//if the reponse url is different than the one constructed, that means it's a redirect and that the ticker is probably wrong
-		if(!matches) {
-			System.out.println("Could not connect to the web page. Please make sure the ticker symbol is valid.");
-			System.exit(0); //exit out of method if wrong input
-		}
-		
-		Document doc = Jsoup.connect(url).timeout(10000).get();
-		//System.out.println("URL: " + url); 
-		//System.out.println("Doc: " + doc.toString());
-		
-		Element table = doc.select("table").get(0); //select first table from document. this table holds the historical data
-		//System.out.println("table: " + table.toString());
-		
-		Element body = table.selectFirst("tbody");
-		//select the body of the table. This ignores the header (the column names)
-		
-		Elements rows = body.select("tr"); //select the rows of table
-		//System.out.println("rows: " + rows.toString());
+		Elements rows = getHistoricalDataRows(ticker, getURL(ticker));
 		
 		if(amount > rows.size()) { //if amount asked for is greater than rows available, let user know and then retrieve max amount of records
 			System.out.print("Sorry, the amount you requested is greater than the amount available. "
@@ -163,31 +163,7 @@ public class HistoricalData {
 		double[] adjClose;
 		ArrayList<String> stringArrayList = new ArrayList<>();
 		
-		//validate that the ticker is correct by making sure the user lands on the URL constructed
-		String url = getURL(ticker); //url constructed
-		Response response = Jsoup.connect(url).followRedirects(true).execute(); //response we get when trying to connect to url constructed
-		String urlResponse = response.url().toString(); //store the response in a string
-		
-		boolean matches = url.equals(urlResponse); //assign the value of whether the two strings match to a boolean variable
-		
-		//if the reponse url is different than the one constructed, that means it's a redirect and that the ticker is probably wrong
-		if(!matches) {
-			System.out.println("Could not connect to the web page. Please make sure the ticker symbol is valid.\n");
-			System.exit(0); //exit out of method if wrong input
-		}
-		
-		Document doc = Jsoup.connect(url).timeout(10000).get();
-		//System.out.println("URL: " + url); 
-		//System.out.println("Doc: " + doc.toString());
-		
-		Element table = doc.select("table").get(0); //select first table from document. this table holds the historical data
-		//System.out.println("table: " + table.toString());
-		
-		Element body = table.selectFirst("tbody");
-		//select the body. This ignores the header (the column names)
-		
-		Elements rows = body.select("tr"); //get rows of table
-		//System.out.println("rows: " + rows.toString());
+		Elements rows = getHistoricalDataRows(ticker, getURL(ticker));
 		
 		if(amount > rows.size()) {
 			System.out.print("Sorry, the amount you requested is greater than the amount available. ");

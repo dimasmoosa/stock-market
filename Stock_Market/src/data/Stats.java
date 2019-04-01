@@ -430,5 +430,16 @@ public class Stats {
 		return successRate;
 	}
 	
+	
+	//create method for positive successRate (staying within +X%)
+//	public double getNegativeSuccessRate() {
+//		
+//	}
+	
+	
+	//create method for negative successRate (staying within -X%)
+//	public double getPositiveSuccessRate(){
+//		
+//	}
 
 }
