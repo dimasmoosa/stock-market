@@ -220,8 +220,17 @@ public class Stats {
 		return avg;
 	}	
 	
-	
-	public double getSuccessRate(String ticker, int weeks, double threshold) throws IOException {
+	/**
+	 * A method that gets the success rate of a specified stock/ETF staying within a specified % threshold over the specified amount of past weeks
+	 * For example, the rate at which Apple stayed within +/- 5% movement from Monday close to Friday close in the last 10 weeks
+	 * 
+	 * @param ticker
+	 * @param weeks
+	 * @param threshold
+	 * @return
+	 * @throws IOException
+	 */
+	public double getSuccessRate(String ticker, int weeks, double threshold) throws IOException { 
 		double successRate = 0;
 		
 		//----------------------------------------------------------------------------------------------------------------------------------
@@ -418,10 +427,10 @@ public class Stats {
 		successRate = (1 - failureRate) * 100;
 		successRate = Double.parseDouble(df.format(successRate));
 
-		System.out.println("Done retrieving the success rate of " + ticker + " for a " + threshold + "% threshold in the last " 
-							+ weeks + " weeks. ");
-		System.out.println(ticker + " succesfully stayed within +/- " + threshold + "% movement for " 
-							+ successRate + "% of weeks in the last " + weeks + " weeks. \n");
+//		System.out.println("Done retrieving the success rate of " + ticker + " for a " + threshold + "% threshold in the last " 
+//							+ weeks + " weeks. ");
+//		System.out.println(ticker + " succesfully stayed within +/- " + threshold + "% movement for " 
+//							+ successRate + "% of weeks in the last " + weeks + " weeks. \n");
 		
 		//----------------------------------------------------------------------------------------------------------------------------------
 		
@@ -430,6 +439,60 @@ public class Stats {
 		return successRate;
 	}
 	
+	/**
+	 * A method that gets the failure rate of a specified stock/ETF staying within a specified % threshold over the specified amount of past weeks
+	 * For example, the rate at which Apple DID NOT stay within +/- 5% movement from Monday close to Friday close in the last 10 weeks
+	 * This method returns 1-getSuccessRate()
+	 * 
+	 * @param ticker
+	 * @param weeks
+	 * @param threshold
+	 * @return
+	 * @throws IOException
+	 */
+	public double getFailureRate(String ticker, int weeks, double threshold) throws IOException { 
+		double failureRate = 0;
+		
+		//----------------------------------------------------------------------------------------------------------------------------------
+		DecimalFormat df = new DecimalFormat("#.00");
+		
+		failureRate = 100 - getSuccessRate(ticker, weeks, threshold);
+		failureRate = Double.parseDouble(df.format(failureRate));
+		
+		//----------------------------------------------------------------------------------------------------------------------------------
+		
+		return failureRate;
+	}
+	
+	
+	/*
+	 * Equation to consider when implementing what price to buy the option at or to get a break even point
+	 * This is for a Call Credit Spread or Bear Call Spread
+	 * a = credit
+	 * b = spread
+	 * c = (b-a) = max loss or net loss
+	 * x = past successRate of staying within a % movement
+	 * y = past failureRate of staying within a % movement
+	 * 
+	 * Let's use Apple as an example, which usually have a 250 (2.50x100) spread for a credit spread close to the current price
+	 * b = 250
+	 * Let's also assume past successRate within the last 4 weeks of Apple staying within a specified +/- % (will have to do + later for this spread)
+	 * is 75%. This means the failureRate is 25%
+	 * x = .75
+	 * y = .25
+	 * 
+	 * The equation to get the intersection, or the point at which profit = loss or break-even point, then is:
+	 * x*a = y*(b-a)
+	 * or, in this case:
+	 * .75a = .25(250-a)
+	 * Solving...
+	 * .75a = (.25*250) - (.25*a)
+	 * 1a = .25*250
+	 * a = 62.5
+	 * In this case, 62.5 would be the break-even point. In other words, this would be the price of the credit at which we would break even at,
+	 * assuming that the past volatility is similar to future volatility  
+	 * 
+	 */
 	
 	//create method for positive movement successRate (staying within +X%)
 //	public double getNegativeSuccessRate() {
@@ -438,6 +501,18 @@ public class Stats {
 	
 	
 	//create method for negative movement successRate (staying within -X%)
+//	public double getPositiveSuccessRate(){
+//		
+//	}
+	
+	
+	//create method for positive movement failureRate (staying within +X%)
+//	public double getNegativeSuccessRate() {
+//		
+//	}
+	
+	
+	//create method for negative movement failureRate (staying within -X%)
 //	public double getPositiveSuccessRate(){
 //		
 //	}

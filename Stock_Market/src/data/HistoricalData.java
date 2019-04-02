@@ -62,6 +62,7 @@ public class HistoricalData {
 	
 	/*
 	 * Layout of the historical data table
+	 *   0     1      2      3      4          5         6
 	 * date | open | high | low | close* | adj close | volume
 	 */
 	

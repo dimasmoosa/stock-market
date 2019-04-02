@@ -28,11 +28,13 @@ public class Application {
 
 		
 		try {
-			double success = stats.getSuccessRate("AAPL", 20, 2.86);
-			double[] prices = hd.getAdjClosePrice("AAPL", 10);
-			for(int i = 0; i < prices.length; i++) {
-				System.out.println(prices[i]);
-			}
+			double success = stats.getSuccessRate("AAPL", 20, 3.76);
+			double failure = stats.getFailureRate("AAPL", 4, 3.76); 
+			System.out.println("success: " + success + "\nfailure: " + failure);
+//			double[] prices = hd.getAdjClosePrice("AAPL", 10);
+//			for(int i = 0; i < prices.length; i++) {
+//				System.out.println(prices[i]);
+//			}
 			
 		} 
 		catch (IOException e) {
