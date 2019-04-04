@@ -28,9 +28,14 @@ public class Application {
 
 		
 		try {
-			double success = stats.getSuccessRate("AAPL", 20, 3.76);
-			double failure = stats.getFailureRate("AAPL", 4, 3.76); 
-			System.out.println("success: " + success + "\nfailure: " + failure);
+			double success4 = stats.getSuccessRate("AAPL", 4, 1.96);
+			double success10 = stats.getSuccessRate("AAPL", 10, 1.96);
+			double success20 = stats.getSuccessRate("AAPL", 20, 1.96);
+			System.out.println("success: " + success4);
+			System.out.println("success: " + success10);
+			System.out.println("success: " + success20);
+
+//			System.out.println(stats.getAverageWeeklyMovement("AAPL", 15));
 //			double[] prices = hd.getAdjClosePrice("AAPL", 10);
 //			for(int i = 0; i < prices.length; i++) {
 //				System.out.println(prices[i]);
