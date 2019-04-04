@@ -28,11 +28,7 @@ public class Application {
 
 		
 		try {
-			double success4 = stats.getSuccessRate("AAPL", 4, 1.96);
-			double success10 = stats.getSuccessRate("AAPL", 10, 1.96);
-			double success20 = stats.getSuccessRate("AAPL", 20, 1.96);
-			System.out.println("success: " + success4);
-			System.out.println("success: " + success10);
+			double success20 = stats.getPositiveSuccessRate("AAPL", 4, 5);
 			System.out.println("success: " + success20);
 
 //			System.out.println(stats.getAverageWeeklyMovement("AAPL", 15));
