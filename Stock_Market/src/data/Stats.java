@@ -369,5 +369,11 @@ public class Stats {
 	 * assuming that the past volatility is similar to future volatility, if the success rate was 75% and the spread 250.
 	 * 
 	 */
+	
+	
+	//implement a standard deviation method
+//	public double getStandardDeviation(String ticker, int weeks) {
+//		
+//	}
 
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import data.HistoricalData;
+import data.OptionsData;
 import data.Stats;
 
 /**
@@ -24,18 +25,19 @@ public class Application {
 		 //return info to user
 		
 		HistoricalData hd = new HistoricalData(); //instantiate HistoricalData object
+		OptionsData od = new OptionsData();
 		Stats stats = new Stats();
 
 		
 		try {
-			double success20 = stats.getPositiveSuccessRate("AAPL", 4, 5);
-			System.out.println("success: " + success20);
-
-//			System.out.println(stats.getAverageWeeklyMovement("AAPL", 15));
-//			double[] prices = hd.getAdjClosePrice("AAPL", 10);
-//			for(int i = 0; i < prices.length; i++) {
-//				System.out.println(prices[i]);
-//			}
+//			double success20 = stats.getPositiveSuccessRate("AAPL", 10, 1.75);
+//			System.out.println("success: " + success20);
+			
+			System.out.println(od.getInTheMoneyRows(od.getCallsTable("AAPL")).size());
+			System.out.println(od.getInTheMoneyRows(od.getPutsTable("AAPL")).size());
+			
+			System.out.println(od.getOutOfTheMoneyRows(od.getCallsTable("AAPL")).size());
+			System.out.println(od.getOutOfTheMoneyRows(od.getPutsTable("AAPL")).size());
 			
 		} 
 		catch (IOException e) {
