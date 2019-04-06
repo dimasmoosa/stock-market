@@ -33,11 +33,15 @@ public class Application {
 //			double success20 = stats.getPositiveSuccessRate("AAPL", 10, 1.75);
 //			System.out.println("success: " + success20);
 			
-			System.out.println(od.getInTheMoneyRows(od.getCallsTable("AAPL")).size());
-			System.out.println(od.getInTheMoneyRows(od.getPutsTable("AAPL")).size());
+			System.out.println("call table child node size: " + od.getCallsTable("AAPL").childNodeSize());
+			System.out.println("put table child node size: " + od.getPutsTable("AAPL").childNodeSize());
 			
-			System.out.println(od.getOutOfTheMoneyRows(od.getCallsTable("AAPL")).size());
-			System.out.println(od.getOutOfTheMoneyRows(od.getPutsTable("AAPL")).size());
+			System.out.println("ITM calls table rows: " + od.getInTheMoneyRows(od.getCallsTable("AAPL")).size());
+			System.out.println("ITM puts table rows: " + od.getInTheMoneyRows(od.getPutsTable("AAPL")).size());
+			
+			System.out.println("OTM calls table rows: " + od.getOutOfTheMoneyRows(od.getCallsTable("AAPL")).size());
+			System.out.println("OTM puts table rows: " + od.getOutOfTheMoneyRows(od.getPutsTable("AAPL")).size());
+			
 			
 		} 
 		catch (IOException e) {

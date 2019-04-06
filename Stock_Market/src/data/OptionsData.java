@@ -36,16 +36,21 @@ public class OptionsData {
 	 * @throws IOException
 	 */
 	public Element getCallsTable(String ticker) throws IOException {
-		Element callsTable;
+		Element callsTable = null;
 		String url = getOptionsDataURL(ticker);
 		
-		Document doc = Jsoup.connect(url).timeout(10000).get();
-		
-		Elements tables = doc.select("table");
-		
-		callsTable = tables.get(0); //is there a better way of doing this? what if the table positions change?
-		
-		callsTable = callsTable.selectFirst("tbody"); //--------------------------------------delete this?
+		try {
+			Document doc = Jsoup.connect(url).timeout(10000).get();
+			
+			Elements tables = doc.select("table");
+			
+			callsTable = tables.get(0); //is there a better way of doing this? what if the table positions change?
+			
+			callsTable = callsTable.selectFirst("tbody"); //--------------------------------------delete this?
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return callsTable;
 	}
@@ -62,16 +67,21 @@ public class OptionsData {
 		// the contents are stored in the "tbody" element of the "table"... those contain the actual rows of data
 		// WILL PROBABLY HAVE TO DO THIS SINCE, CURRENTLY, THE GETOUTOFTHEMONEY METHOD AS IMPLEMENTED MESSES UP BC OF THIS
 		//--------------------------------------------------------------------------------------------------------------
-		Element putsTable;
+		Element putsTable = null;
 		String url = getOptionsDataURL(ticker);
 		
-		Document doc = Jsoup.connect(url).timeout(10000).get();
-		
-		Elements tables = doc.select("table");
-		
-		putsTable = tables.get(1); //is there a better way of doing this? what if the table positions change?
-		
-		putsTable = putsTable.selectFirst("tbody"); //-----------------------------------------------delete this?
+		try {
+			Document doc = Jsoup.connect(url).timeout(10000).get();
+			
+			Elements tables = doc.select("table");
+			
+			putsTable = tables.get(1); //is there a better way of doing this? what if the table positions change?
+			
+			putsTable = putsTable.selectFirst("tbody"); //-----------------------------------------------delete this?
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return putsTable;
 	}
@@ -101,7 +111,7 @@ public class OptionsData {
 		Elements outOfTheMoneyRows = null;
 		
 		try{
-			outOfTheMoneyRows = table.select("[class!=data-row]"); //need a better selector. might have to rely on getting index
+			outOfTheMoneyRows = table.select("[class*=data-row]:not([class*=in-the-money])");
 		}
 		catch(Exception e) {
 			System.out.println(e);
