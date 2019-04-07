@@ -1,6 +1,7 @@
 package data;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,8 +36,8 @@ public class OptionsData {
 	 * @return Calls table
 	 * @throws IOException
 	 */
-	public Element getCallsTable(String ticker) throws IOException {
-		Element callsTable = null;
+	public Element getCallsTableBody(String ticker) throws IOException {
+		Element callsTableBody = null;
 		String url = getOptionsDataURL(ticker);
 		
 		try {
@@ -44,15 +45,15 @@ public class OptionsData {
 			
 			Elements tables = doc.select("table");
 			
-			callsTable = tables.get(0); //is there a better way of doing this? what if the table positions change?
+			callsTableBody = tables.get(0); 
 			
-			callsTable = callsTable.selectFirst("tbody"); //--------------------------------------delete this?
+			callsTableBody = callsTableBody.selectFirst("tbody"); 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
-		return callsTable;
+		return callsTableBody;
 	}
 	
 	/**
@@ -61,13 +62,8 @@ public class OptionsData {
 	 * @return Puts table
 	 * @throws IOException
 	 */
-	public Element getPutsTable(String ticker) throws IOException {
-		//--------------------------------------------------------------------------------------------------------------
-		// this method along with the getCallsTable method returns the whole table. do we only want the contents though?
-		// the contents are stored in the "tbody" element of the "table"... those contain the actual rows of data
-		// WILL PROBABLY HAVE TO DO THIS SINCE, CURRENTLY, THE GETOUTOFTHEMONEY METHOD AS IMPLEMENTED MESSES UP BC OF THIS
-		//--------------------------------------------------------------------------------------------------------------
-		Element putsTable = null;
+	public Element getPutsTableBody(String ticker) throws IOException {
+		Element putsTableBody = null;
 		String url = getOptionsDataURL(ticker);
 		
 		try {
@@ -75,22 +71,41 @@ public class OptionsData {
 			
 			Elements tables = doc.select("table");
 			
-			putsTable = tables.get(1); //is there a better way of doing this? what if the table positions change?
+			putsTableBody = tables.get(1); 
 			
-			putsTable = putsTable.selectFirst("tbody"); //-----------------------------------------------delete this?
+			putsTableBody = putsTableBody.selectFirst("tbody"); 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return putsTable;
+		return putsTableBody;
+	}
+	
+	/**
+	 * @param Element - tbody element
+	 * @return Elements - rows of the the tbody element
+	 */
+	public Elements getRows(Element tableBody) {
+		Elements rows = null;
+		
+		try {
+			rows = tableBody.select("[class*=data-row]"); //can also use .ChildNodes() method to retrieve the child nodes (the rows in this case)
+		}
+		catch(Exception e) {
+			System.out.println(e);
+		}
+		
+		return rows;
 	}
 
 	/**
+	 * A method to retrieve the ITM (in the money) rows of a table
 	 * 
-	 * @return
+	 * @param Element table you want the ITM rows of
+	 * @return Elements - ITM rows of the table
 	 */
-	public Elements getInTheMoneyRows(Element table) {
+	public Elements getRowsITM(Element table) {
 		Elements inTheMoneyRows = null;
 
 		try{
@@ -104,10 +119,12 @@ public class OptionsData {
 	}
 	
 	/**
+	 * A method to retrieve the OTM (out of the money) rows of a table
 	 * 
-	 * @return
+	 * @param Element - table you want the OTM rows of
+	 * @return Elements - OTM rows of the table
 	 */
-	public Elements getOutOfTheMoneyRows(Element table) {
+	public Elements getRowsOTM(Element table) {
 		Elements outOfTheMoneyRows = null;
 		
 		try{
@@ -120,7 +137,57 @@ public class OptionsData {
 		return outOfTheMoneyRows;
 	}
 	
-	//public int getIndexOfAtTheMoney
+	/**
+	 * A method that retrieves the index of the closest OTM row index to ATM
+	 * 
+	 * @param ticker - the ticker symbol of the stock/ETF
+	 * @return the index of the "ATM" row, which is actually the first OTM row index 
+	 * @throws IOException
+	 */
+	public int getCallsATMIndex(String ticker) throws IOException {
+		int index = 0;
+		Element tbody = null;
+		
+		try {
+			tbody = getCallsTableBody(ticker);
+			index = getRowsITM(tbody).size();
+		}
+		catch(Exception e) {
+			System.out.println(e);
+		}
+		
+		return index;
+	}
+	
+	/**
+	 *  A method that retrieves the index of the closest ITM row index to ATM
+	 * 
+	 * @param ticker - the ticker symbol of the stock/ETf
+	 * @return the index of the "ATM" row, which UNLIKE CALLS ATM INDEX is the first ITM row index
+	 */
+	public int getPutsATMIndex(String ticker) {
+		int index = 0;
+		Element tbody = null;
+		
+		try {
+			tbody = getPutsTableBody(ticker);
+			index = getRowsOTM(tbody).size();
+		}
+		catch(Exception e) {
+			System.out.println(e);
+		}
+		
+		return index;
+	}
+	
+	
+	private ArrayList<Double> getCallsLastPriceArray(String ticker) {
+		ArrayList<Double> callsLastPrice = new ArrayList<>();
+		
+		
+		
+		return callsLastPrice;
+	}
 	
 
 }

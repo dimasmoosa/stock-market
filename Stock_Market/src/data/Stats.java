@@ -21,7 +21,7 @@ public class Stats {
 	 * @return
 	 * @throws IOException
 	 */
-	public ArrayList<Double> getWeeklyMovementPercent(String ticker, int weeks) throws IOException {
+	private ArrayList<Double> getWeeklyMovementArray(String ticker, int weeks) throws IOException {
 		double weeklyMovement = 0;
 		ArrayList<Double> allWeeklyMovement = new ArrayList<>(); //ArrayList of all the weekly movements
 		
@@ -201,7 +201,7 @@ public class Stats {
 	 * @throws IOException 
 	 */
 	public double getAverageWeeklyMovement(String ticker, int weeks) throws IOException, ParseException {
-		ArrayList<Double> weeklyMovementArray = getWeeklyMovementPercent(ticker, weeks);
+		ArrayList<Double> weeklyMovementArray = getWeeklyMovementArray(ticker, weeks);
 		
 		double weeklyMovementSum = 0;
 		double avg = 0;
@@ -248,7 +248,7 @@ public class Stats {
 		
 		int amountExceeded = 0;
 		
-		ArrayList<Double> weeklyMovementArray = getWeeklyMovementPercent(ticker, weeks);
+		ArrayList<Double> weeklyMovementArray = getWeeklyMovementArray(ticker, weeks);
 		
 		for(int i = 0; i < weeklyMovementArray.size(); i++) {
 			if(Math.abs(weeklyMovementArray.get(i)) > threshold) {
@@ -296,7 +296,7 @@ public class Stats {
 	public double getPositiveSuccessRate(String ticker, int weeks, double threshold) throws IOException {
 		double positiveSuccessRate = 0;
 	
-		ArrayList<Double> weeklyMovement = getWeeklyMovementPercent(ticker, weeks);
+		ArrayList<Double> weeklyMovement = getWeeklyMovementArray(ticker, weeks);
 		
 		int amountNotExceeded = 0;
 		

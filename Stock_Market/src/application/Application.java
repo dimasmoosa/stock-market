@@ -10,6 +10,7 @@ import data.HistoricalData;
 import data.OptionsData;
 import data.Stats;
 
+
 /**
  * @author Dimas Moosa
  * 
@@ -27,21 +28,20 @@ public class Application {
 		HistoricalData hd = new HistoricalData(); //instantiate HistoricalData object
 		OptionsData od = new OptionsData();
 		Stats stats = new Stats();
-
 		
-		try {
-//			double success20 = stats.getPositiveSuccessRate("AAPL", 10, 1.75);
-//			System.out.println("success: " + success20);
-			
-			System.out.println("call table child node size: " + od.getCallsTable("AAPL").childNodeSize());
-			System.out.println("put table child node size: " + od.getPutsTable("AAPL").childNodeSize());
-			
-			System.out.println("ITM calls table rows: " + od.getInTheMoneyRows(od.getCallsTable("AAPL")).size());
-			System.out.println("ITM puts table rows: " + od.getInTheMoneyRows(od.getPutsTable("AAPL")).size());
-			
-			System.out.println("OTM calls table rows: " + od.getOutOfTheMoneyRows(od.getCallsTable("AAPL")).size());
-			System.out.println("OTM puts table rows: " + od.getOutOfTheMoneyRows(od.getPutsTable("AAPL")).size());
-			
+		String ticker = "AAPL";
+		
+		try {			
+			System.out.println(od.getRows(od.getCallsTableBody("AAPL")).size());
+			System.out.println(od.getRowsITM(od.getCallsTableBody("AAPL")).size());
+			System.out.println(od.getRowsOTM(od.getCallsTableBody("AAPL")).size());
+			System.out.println("\n\n");
+			System.out.println(od.getRows(od.getPutsTableBody("AAPL")).size());
+			System.out.println(od.getRowsITM(od.getPutsTableBody("AAPL")).size());
+			System.out.println(od.getRowsOTM(od.getPutsTableBody("AAPL")).size());
+			System.out.println("\n\n");
+			System.out.println("Index of calls ATM " + od.getCallsATMIndex("AAPL"));
+			System.out.println("Index of puts ATM " + od.getPutsATMIndex("AAPL"));
 			
 		} 
 		catch (IOException e) {

@@ -41,7 +41,7 @@ public class HistoricalData {
 	private Elements getHistoricalDataRows(String ticker) throws IOException {
 		String url = getHistoricalDataURL(ticker); //get the URL
 		Response response = Jsoup.connect(url).followRedirects(true).execute(); //get the reponse of the URL
-		String urlResponse = response.url().toString(); //store the reponse in a string
+		String urlResponse = response.url().toString(); //store the response in a string
 		
 		boolean matches = url.equals(urlResponse); //does the URL match the response we get? store that value in a boolean
 		
