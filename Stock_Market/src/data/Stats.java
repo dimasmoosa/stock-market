@@ -243,7 +243,9 @@ public class Stats {
 	 * @return
 	 * @throws IOException
 	 */
-	public double getFailureRate(String ticker, int weeks, double threshold) throws IOException { 
+	public double getFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException { 
+		threshold = Math.abs(threshold);
+		
 		double failureRate = 0;
 		
 		int amountExceeded = 0;
@@ -274,10 +276,12 @@ public class Stats {
 	 * @return
 	 * @throws IOException
 	 */
-	public double getSuccessRate(String ticker, int weeks, double threshold) throws IOException { 
+	public double getSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException { 
+		threshold = Math.abs(threshold);
+		
 		double successRate = 0;
 
-		successRate = 100 - getFailureRate(ticker, weeks, threshold);
+		successRate = 100 - getFailureRateWithinThreshold(ticker, weeks, threshold);
 		successRate = Double.parseDouble(df.format(successRate));
 
 		return successRate;
@@ -293,7 +297,17 @@ public class Stats {
 	 * @return
 	 * @throws IOException
 	 */
-	public double getPositiveSuccessRate(String ticker, int weeks, double threshold) throws IOException {
+	public double getPositiveMovementSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException {
+		if(threshold == 0) {
+			System.out.println("Please enter a non-zero threshold percentage");
+			
+			System.exit(0);
+		}
+		else if(threshold < 0) {
+			System.out.println("You entered a negative threshold so it will be converted to a positive one");
+			threshold *= -1;
+		}
+		
 		double positiveSuccessRate = 0;
 	
 		ArrayList<Double> weeklyMovement = getWeeklyMovementArray(ticker, weeks);
@@ -303,9 +317,9 @@ public class Stats {
 		int amountOfPositiveMovements = 0;
 		
 		for(int i = 0; i < weeklyMovement.size(); i++) {
-			if(weeklyMovement.get(i) >= 0) {
+			if(weeklyMovement.get(i) >= 0) { //is it okay to include 0 as a positive #? how likely is it that 0% movement will occur in a week?
 				amountOfPositiveMovements++;
-				if(weeklyMovement.get(i) < threshold) {
+				if(weeklyMovement.get(i) <= threshold) {
 					amountNotExceeded++;
 				}
 			}
@@ -323,23 +337,75 @@ public class Stats {
 		return positiveSuccessRate;
 	}
 	
-	
-	//create method for negative movement successRate (staying within -X%)
-//	public double getNegativeSuccessRate(){
-//		
-//	}
-	
-	
-	//create method for positive movement failureRate (staying within +X%)
-//	public double getPositiveFailureRate() {
-//		
-//	}
+	//create method for positive movement failureRate (staying within +X% / +N)
+	public double getPositiveMovementFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException {
+		double positiveFailureRate = 0;
+		
+		positiveFailureRate = 100 - getPositiveMovementSuccessRateWithinThreshold(ticker, weeks, threshold);
+		positiveFailureRate = Double.parseDouble(df.format(positiveFailureRate));
+		
+		return positiveFailureRate;
+	}
 	
 	
-	//create method for negative movement failureRate (staying within -X%)
-//	public double getNegativeFailureRate(){
-//		
-//	}
+	//create method for negative movement successRate (staying within -X% / -N)
+	public double getNegativeMovementSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException{
+		if(threshold == 0) {
+			System.out.println("Please enter a non-zero threshold percentage");
+			
+			System.exit(0);
+		}
+		else if(threshold > 0) {
+			System.out.println("You entered a positive threshold so it will be converted to a negative one");
+			threshold *= -1;
+		}
+		
+		double negativeSuccessRate = 0;
+		
+		ArrayList<Double> weeklyMovement = getWeeklyMovementArray(ticker, weeks);
+		
+		int amountNotExceeded = 0;
+		
+		int amountOfNegativeMovements = 0;
+		
+		for(int i = 0; i < weeklyMovement.size(); i++) {
+			if(weeklyMovement.get(i) <= 0) { //is it okay to include 0 as a negative #? how likely is it that 0% movement will occur in a week?
+				amountOfNegativeMovements++;
+				if(weeklyMovement.get(i) >= threshold) { //>= since amount will not be exceeded if it's between 0 and -X% threshold
+					amountNotExceeded++;
+				}
+			}
+		}
+		
+		if(amountOfNegativeMovements == 0) {
+			System.out.println("Sorry, there were no negative movements in the past " + weeks + " weeks for " + ticker + ".\n");
+			System.exit(0);
+		}
+		
+		negativeSuccessRate = (double) amountNotExceeded / amountOfNegativeMovements;
+		negativeSuccessRate *= 100;
+		negativeSuccessRate = Double.parseDouble(df.format(negativeSuccessRate));
+		
+		
+		return negativeSuccessRate;
+	}
+	
+	
+	//create method for negative movement failureRate (staying within -X% / -N)
+	public double getNegativeMovementFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException{
+		double negativeFailureRate = 0;
+		
+		negativeFailureRate = 100 - getNegativeMovementSuccessRateWithinThreshold(ticker, weeks, threshold);
+		negativeFailureRate = Double.parseDouble(df.format(negativeFailureRate));
+		
+		
+		return negativeFailureRate;
+	}
+	
+	
+	/*
+	 * Will need to create positive/negative success/failure rate for Exceeding threshold? 6 new methods.
+	 */
 	
 	/*
 	 * Equation to consider when implementing what price to buy the option at or to get a break even point

@@ -32,17 +32,27 @@ public class Application {
 		String ticker = "AAPL";
 		
 		try {			
-			System.out.println(od.getRows(od.getCallsTableBody("AAPL")).size());
-			System.out.println(od.getRowsITM(od.getCallsTableBody("AAPL")).size());
-			System.out.println(od.getRowsOTM(od.getCallsTableBody("AAPL")).size());
-			System.out.println("\n\n");
-			System.out.println(od.getRows(od.getPutsTableBody("AAPL")).size());
-			System.out.println(od.getRowsITM(od.getPutsTableBody("AAPL")).size());
-			System.out.println(od.getRowsOTM(od.getPutsTableBody("AAPL")).size());
-			System.out.println("\n\n");
-			System.out.println("Index of calls ATM " + od.getCallsATMIndex("AAPL"));
-			System.out.println("Index of puts ATM " + od.getPutsATMIndex("AAPL"));
-			
+//			System.out.println(od.getRows(od.getCallsTableBody("AAPL")).size());
+//			System.out.println(od.getRowsITM(od.getCallsTableBody("AAPL")).size());
+//			System.out.println(od.getRowsOTM(od.getCallsTableBody("AAPL")).size());
+//			System.out.println("\n");
+//			System.out.println(od.getRows(od.getPutsTableBody("AAPL")).size());
+//			System.out.println(od.getRowsITM(od.getPutsTableBody("AAPL")).size());
+//			System.out.println(od.getRowsOTM(od.getPutsTableBody("AAPL")).size());
+//			System.out.println("\n");
+//			System.out.println("Index of calls ATM " + od.getCallsATMIndex("AAPL"));
+//			System.out.println("Index of puts ATM " + od.getPutsATMIndex("AAPL"));
+//			System.out.println(od.getClosestITMCallOptionStrikeURL(ticker));
+//			System.out.println(od.getClosestOTMCallOptionStrikeURL(ticker));
+//			System.out.println();
+//			System.out.println(od.getClosestITMPutOptionStrikeURL(ticker));
+//			System.out.println(od.getClosestOTMPutOptionStrikeURL(ticker));
+			System.out.println();
+//			System.out.println(x);
+			System.out.println(stats.getPositiveMovementSuccessRateWithinThreshold(ticker, 10, 2));
+			System.out.println(stats.getPositiveMovementFailureRateWithinThreshold(ticker, 10, 2));
+			System.out.println(stats.getNegativeMovementSuccessRateWithinThreshold(ticker, 10, 2));
+			System.out.println(stats.getNegativeMovementFailureRateWithinThreshold(ticker, 10, 2));
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
