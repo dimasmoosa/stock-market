@@ -1,6 +1,7 @@
 package data;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
@@ -15,6 +16,8 @@ public class OptionsData {
 	 * Layout of the options tables
 	 *        0                1           2           3        4     5       6         7        8           9                  10
 	 * contract name | last trade date | strike | last price | bid | ask | change | % change | volume | open interest | implied volatility 
+	 * 
+	 * 
 	 */
 	
 	/**
@@ -77,7 +80,6 @@ public class OptionsData {
 			
 			putsTableBody = putsTableBody.selectFirst("tbody"); 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -212,7 +214,7 @@ public class OptionsData {
 		
 		//a looks like ---> <a href="the url here" data-symbol="AAPL">195.00</a>
 		Element column = row.select("td").get(2); //3rd td (column) is the one containing the strike
-		Element a = column.selectFirst("a"); //select the a attribute which contains the path
+		Element a = column.selectFirst("a"); //select the a attribute which contains the path. can also get element by attribute "href" same thing
 		String aString = a.toString(); //convert it to string so it can be manipulated
 		String[] firstSplit = aString.split("\""); //split by "
 		String firstString = firstSplit[1]; //get the [1] of that split string ---> the url here" data-symbol="AAPL">195.00</a>
@@ -228,7 +230,7 @@ public class OptionsData {
 	 * @return
 	 * @throws IOException
 	 */
-	public String getClosestITMCallOptionStrikeURL(String ticker) throws IOException {
+	protected String getClosestITMCallOptionStrikeURL(String ticker) throws IOException {
 		String url = null;
 		
 		try {
@@ -249,7 +251,7 @@ public class OptionsData {
 	 * @param ticker
 	 * @return
 	 */
-	public String getClosestOTMCallOptionStrikeURL(String ticker) {
+	protected String getClosestOTMCallOptionStrikeURL(String ticker) {
 		String url = null;
 		
 		try {
@@ -265,7 +267,7 @@ public class OptionsData {
 		return url;
 	}
 	
-	public String getClosestITMPutOptionStrikeURL(String ticker) {
+	protected String getClosestITMPutOptionStrikeURL(String ticker) {
 		String url = null;
 		
 		try {
@@ -282,11 +284,11 @@ public class OptionsData {
 	}
 	
 	
-	public String getClosestOTMPutOptionStrikeURL(String ticker) {
+	protected String getClosestOTMPutOptionStrikeURL(String ticker) {
 		String url = null;
 		
 		try {
-			int index = getPutsATMIndex(ticker) - 1; // -1 since puts are structed OTM -> ATM -> ITM. getPutsATMIndex() returns closest ITM to ATM
+			int index = getPutsATMIndex(ticker) - 1; // -1 since puts are structured OTM -> ATM -> ITM. getPutsATMIndex() returns closest ITM to ATM
 			Element row = getRow(getPutsTableBody(ticker), index);
 			String secondHalfURL = getStrikePath(row);
 			url = yahooFinanceBaseURL + secondHalfURL;
@@ -297,6 +299,42 @@ public class OptionsData {
 		
 		return url;
 	}
+	
+	/*
+	 * URLs for the option contracts are structured this way
+	 * [ticker][YYMMDD][C or P for call or put][########]
+	 * for example
+	 * AAPL190412C00200000 --> AAPL 04/12/19 Call 200.00 or [Apple][4/12/19 expiration date][Call option][200]
+	 * [AAPL][190412][C][0020000]
+	 * 
+	 * characters | 6 digits | C or P character | 8 digits.. up to tens of thousands with two decimal places 
+	 * 
+	 * need a method that will parse a row and determine what
+	 */
+	
+	/*
+	 * we can create methods that retrieve a specific ticker/date/option type/strike using the URL... they have a certain format, for example...
+	 * https://finance.yahoo.com/quote/AAPL190412C00200000?p=AAPL190412C00200000
+	 * url = "https://finance.yahoo.com/quote/" + contract + "?p=" + contract
+	 * contract in this case is the way yahoo finance formats their contracts, for example...
+	 * AAPL190412C00200000
+	 * 
+	 */
+	
+	//-------------------------------------------------------------------------------------------------------------------------------------------
+	//this method needs more work. maybe create overloaded methods that accept different formats of dates and stuff?
+	//also have to figure out how to handle the strike price because it won't always work out with having 2 leading 0s and 3 0s at the end.
+	//that only works with triple digit integers. what if the number is 8.5? also have to deal with decimal problem. 200.0 as opposed to 200..
+	//currrently casting it
+	public String getContractURL(String ticker, String expirationDate, String contractType, double strike) {
+		String url = null;
+		
+		String contract = ticker + expirationDate + contractType + "00" + (int) strike + "000";
+		url = "https://finance.yahoo.com/quote/" + contract + "?p=" + contract;
+		
+		return url;
+	}
+	//-------------------------------------------------------------------------------------------------------------------------------------------
 	
 	
 //	public ArrayList<Double> getCallsLastPriceArray(String ticker) {
