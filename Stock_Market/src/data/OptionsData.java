@@ -316,34 +316,43 @@ public class OptionsData {
 	 * "\\w+|\\w+.\\w+\\d{6}[c|C|p|P]\\d{8}"
 	 * 
 	 */
-	
-	/*
-	 * we can create methods that retrieve a specific ticker/date/option type/strike using the URL... they have a certain format, for example...
-	 * https://finance.yahoo.com/quote/AAPL190412C00200000?p=AAPL190412C00200000
-	 * url = "https://finance.yahoo.com/quote/" + contract + "?p=" + contract
-	 * contract in this case is the way yahoo finance formats their contracts, for example...
-	 * AAPL190412C00200000
+	/**
+	 * A method that gets the Yahoo Finance URL of a contract
 	 * 
+	 * @param ticker The ticker symbol of the security
+	 * @param expirationDate The expiration date of the option contract. Accepts MMddyyyy or ddMMyyyy
+	 * @param contractType The contract type (call or put). Accepts "c" "C" "p" "P" "call" "Call" "put" or "Put" as input
+	 * @param strike The strike price of the contract
+	 * @return
 	 */
-	
-	//-------------------------------------------------------------------------------------------------------------------------------------------
-	//this method needs more work. maybe create overloaded methods that accept different formats of dates and stuff?
-	//also have to figure out how to handle the strike price because it won't always work out with having 2 leading 0s and 3 0s at the end.
-	//that only works with triple digit integers. what if the number is 8.5? also have to deal with decimal problem. 200.0 as opposed to 200..
-	//currrently casting it
 	public String getContractURL(String ticker, String expirationDate, String contractType, double strike) {
 		String url = null;
 		String stringStrike = "";
 		
 		/*
-		 * add validation for the input parameters
+		 * validation/transformation for ticker
 		 */
 		
-		if(ticker.length() == 0 | expirationDate.length() == 0 | contractType.length() == 0 | Double.toString(strike).length() == 0) {
-			System.out.println("One or more of the fields entered (ticker, expiration date, contract type, or strike price) is incorrect.");
-			System.exit(0);
+		
+		/*
+		 * validation/transformation for expiration date
+		 */
+		
+		
+		/*
+		 * validation/transformation for contract type
+		 */
+		if(contractType == "call" | contractType == "Call") {
+			contractType = "C";
 		}
 		
+		if(contractType == "put" | contractType == "Put") {
+			contractType = "P";
+		}
+		
+		/*
+		 * validation/transformation for strike 
+		 */
 		//if the double entered is an integer... we can make the string an integer value so that it doesn't have a decimal
 		if(strike == Math.floor(strike) && !Double.isInfinite(strike)) {
 			int intStrike = (int) strike;
@@ -457,12 +466,27 @@ public class OptionsData {
 			stringStrike = stringStrike + "000";
 		}
 		
+		/*
+		 * ending validation for strike
+		 */
+		
 		
 		String contract = ticker + expirationDate + contractType + stringStrike;
 		
-		
-		
-		url = "https://finance.yahoo.com/quote/" + contract + "?p=" + contract;
+		/*
+		 * last check validation to make sure the full string created matches the regex for strings allowed
+		 * *DISCLAIMER* this is a regex I personally wrote so it may not be 100% correct
+		 * 
+		 * (\\w+|\\w+.\\w+) - one or more characters OR one or more characters plus . plus one or more characters (e.g. F or BRK.B)
+		 * (\\d{6}) - 6 digits (e.g. 210419 or 042119)
+		 * (c|C|p|P) - c or C or p or P (e.g. C)
+		 * (\\d{8}) - 8 digits (e.g. 00200000)
+		 * 
+		 */
+		if(contract.matches("(\\w+|\\w+.\\w+)(\\d{6})(c|C|p|P)(\\d{8})")) {
+			url = "https://finance.yahoo.com/quote/" + contract + "?p=" + contract;
+		}
+
 		
 		return url;
 	}

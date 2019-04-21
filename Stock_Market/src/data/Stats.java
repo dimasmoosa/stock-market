@@ -13,6 +13,21 @@ public class Stats {
 	private DecimalFormat df = new DecimalFormat("#.00");
 	
 	
+	
+	/*
+	 * HAVE TO ADD VALIDATION TO CHECK WHETHER THERE'S A DAY IN THE WEEK WHERE THE MARKET IS CLOSED. IF THERE IS,
+	 * THE DATA WILL BE OFF. FOR EXAMPLE IF THE MARKET IS CLOSED ON A FRIDAY AND THE CURRENT DAY IS A FRIDAY, IT WILL GRAB 
+	 * THURSDAY'S CLOSING PRICE AND SUBTRACT IT FROM LAST FRIDAY'S CLOSING PRICE INSTEAD OF FRIDAY TO MONDAY
+	 * 
+	 * I HAVE TO ACCOUNT FOR THIS SOMEHOW BY CHECKING IF THERE WERE ANY DAYS WHERE THE MARKET WAS CLOSED AND ADJUSTING THE
+	 * THE OFFSET ACCORDINGLY
+	 * 
+	 * MAYBE I CAN USE THIS WEBSITE https://www.nasdaqtrader.com/Trader.aspx?id=Calendar AND PARSE IT TO ADJUST ACCORDINGLY
+	 * 
+	 * brainstorming: from the number of weeks inputted, cycle through the days and see how many days the markets were closed
+	 * if it was closed 1 day in the past x amount of weeks, subtract that 1 amount of days from how often to cycle (?) or
+	 * we can maybe subtract 1 from the offset?
+	 */
 	/**
 	 * A method that returns an ArrayList<Double> containing the past specified number of weekly movements of a specified ticker
 	 * 
@@ -21,7 +36,7 @@ public class Stats {
 	 * @return
 	 * @throws IOException
 	 */
-	private ArrayList<Double> getWeeklyMovementArray(String ticker, int weeks) throws IOException {
+	public ArrayList<Double> getWeeklyMovementArray(String ticker, int weeks) throws IOException {
 		double weeklyMovement = 0;
 		ArrayList<Double> allWeeklyMovement = new ArrayList<>(); //ArrayList of all the weekly movements
 		

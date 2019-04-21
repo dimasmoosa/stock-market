@@ -49,14 +49,14 @@ public class Application {
 //			System.out.println(od.getClosestOTMPutOptionStrikeURL(ticker));
 			System.out.println();
 //			System.out.println(x);
-			System.out.println(stats.getAverageWeeklyMovement(ticker, 20));
+			System.out.println(stats.getWeeklyMovementArray(ticker, 1));
 //			System.out.println(stats.getPositiveMovementSuccessRateWithinThreshold(ticker, 20, 3.04));
 //			System.out.println(stats.getPositiveMovementFailureRateWithinThreshold(ticker, 20, 3.04));
 //			System.out.println(stats.getNegativeMovementSuccessRateWithinThreshold(ticker, 20, 3.04));
 //			System.out.println(stats.getNegativeMovementFailureRateWithinThreshold(ticker, 20, 3.04));
 //			System.out.println(stats.getSuccessRateWithinThreshold(ticker, 20, 3.04));
 			
-			System.out.println(od.getContractURL(ticker, "190426", "c", 200));
+			System.out.println(od.getContractURL(ticker, "190426", "C", 200));
 			
 		} 
 		catch (IOException e) {
