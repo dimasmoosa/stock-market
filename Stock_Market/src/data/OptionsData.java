@@ -310,6 +310,11 @@ public class OptionsData {
 	 * characters | 6 digits | C or P character | 8 digits.. up to tens of thousands with two decimal places 
 	 * 
 	 * need a method that will parse a row and determine what
+	 * 
+	 * below is the regex pattern (not including the quotes) to validate a options contract (made myself so not sure if it validates 100% perfectly)
+	 * 
+	 * "\\w+|\\w+.\\w+\\d{6}[c|C|p|P]\\d{8}"
+	 * 
 	 */
 	
 	/*
@@ -328,8 +333,135 @@ public class OptionsData {
 	//currrently casting it
 	public String getContractURL(String ticker, String expirationDate, String contractType, double strike) {
 		String url = null;
+		String stringStrike = "";
 		
-		String contract = ticker + expirationDate + contractType + "00" + (int) strike + "000";
+		/*
+		 * add validation for the input parameters
+		 */
+		
+		if(ticker.length() == 0 | expirationDate.length() == 0 | contractType.length() == 0 | Double.toString(strike).length() == 0) {
+			System.out.println("One or more of the fields entered (ticker, expiration date, contract type, or strike price) is incorrect.");
+			System.exit(0);
+		}
+		
+		//if the double entered is an integer... we can make the string an integer value so that it doesn't have a decimal
+		if(strike == Math.floor(strike) && !Double.isInfinite(strike)) {
+			int intStrike = (int) strike;
+			stringStrike = Integer.toString(intStrike);
+		}
+		else {
+			stringStrike = Double.toString(strike);
+		}
+
+		boolean hasDecimal = stringStrike.contains(".");
+		
+		//if the strike price has a decimal then we have to figure out how many leading and trailing 0s to add to it for the URL
+		if(hasDecimal) {
+			String[] splitArray = stringStrike.split("."); //split by the decimal
+			
+			String leftPart = splitArray[0]; //store the digits before the decimal in a string
+			String rightPart = splitArray[1]; //store the digits after the decimal in a string
+			
+			int leftLength = leftPart.length(); //get length of digits before decimal
+			int rightLength = rightPart.length(); //get length of digits after decimal
+			
+			if(leftLength > 5) {
+				System.out.println("The length of digits before the decimal place is too large. Try a number with a length of 5 or smaller.");
+				System.exit(0);
+			}
+			if(rightLength > 2) {
+				System.out.println("The length of digits after the decimal place is too large. Try a number with a length of 2 or smaller.");
+				System.exit(0);
+			}
+			
+			
+			switch(leftLength) {
+			
+			case 0: 
+				leftPart = "00000";
+				break;
+				
+			case 1:
+				leftPart = "0000" + leftPart;
+				break;
+				
+			case 2:
+				leftPart = "000" + leftPart;
+				break;
+			
+			case 3:
+				leftPart = "00" + leftPart;
+				break;
+			
+			case 4:
+				leftPart = "0" + leftPart;
+				break;
+			
+			case 5:
+				break;
+			
+			}
+			
+			switch(rightLength) {
+			
+			case 0:
+				rightPart = "000";
+				break;
+			
+			case 1:
+				rightPart = rightPart + "00";
+				break;
+				
+			case 2:
+				rightPart = rightPart + "0";
+				break;
+			
+			}
+			
+			stringStrike = leftPart+rightPart;
+			
+		}
+		//if the strike price doesn't have a decimal then we can just add the leading 0s to it
+		else if (!hasDecimal) {
+			int digitlength = stringStrike.length();
+			
+			switch(digitlength) {
+			
+			case 0: 
+				System.out.println("Can't have an empty strike price");
+				System.exit(0);
+				break;
+				
+			case 1:
+				stringStrike = "0000" + stringStrike;
+				break;
+				
+			case 2:
+				stringStrike = "000" + stringStrike;
+				break;
+			
+			case 3:
+				stringStrike = "00" + stringStrike;
+				break;
+			
+			case 4:
+				stringStrike = "0" + stringStrike;
+				break;
+			
+			case 5:
+				break;
+			
+			}
+			
+			//add two zeros as the decimal values if it's an integer
+			stringStrike = stringStrike + "000";
+		}
+		
+		
+		String contract = ticker + expirationDate + contractType + stringStrike;
+		
+		
+		
 		url = "https://finance.yahoo.com/quote/" + contract + "?p=" + contract;
 		
 		return url;
