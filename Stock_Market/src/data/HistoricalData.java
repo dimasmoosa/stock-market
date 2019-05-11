@@ -260,5 +260,13 @@ public class HistoricalData {
 		
 		return dates;
 	}
+	
+	
+//	public LocalDate getDate(String ticker, String date) {
+//		LocalDate ld = LocalDate.parse(date, DateTimeFormatter.ofPattern("MMM d, y"));
+//		
+//		
+//		return ld;
+//	}
 
 }

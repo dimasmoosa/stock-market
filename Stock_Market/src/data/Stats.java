@@ -19,14 +19,10 @@ public class Stats {
 	 * THE DATA WILL BE OFF. FOR EXAMPLE IF THE MARKET IS CLOSED ON A FRIDAY AND THE CURRENT DAY IS A FRIDAY, IT WILL GRAB 
 	 * THURSDAY'S CLOSING PRICE AND SUBTRACT IT FROM LAST FRIDAY'S CLOSING PRICE INSTEAD OF FRIDAY TO MONDAY
 	 * 
-	 * I HAVE TO ACCOUNT FOR THIS SOMEHOW BY CHECKING IF THERE WERE ANY DAYS WHERE THE MARKET WAS CLOSED AND ADJUSTING THE
-	 * THE OFFSET ACCORDINGLY
+	 * I HAVE TO ACCOUNT FOR THIS SOMEHOW BY CHECKING IF THERE WERE ANY DAYS WHERE THE MARKET WAS CLOSED 
 	 * 
 	 * MAYBE I CAN USE THIS WEBSITE https://www.nasdaqtrader.com/Trader.aspx?id=Calendar AND PARSE IT TO ADJUST ACCORDINGLY
 	 * 
-	 * brainstorming: from the number of weeks inputted, cycle through the days and see how many days the markets were closed
-	 * if it was closed 1 day in the past x amount of weeks, subtract that 1 amount of days from how often to cycle (?) or
-	 * we can maybe subtract 1 from the offset?
 	 */
 	/**
 	 * A method that returns an ArrayList<Double> containing the past specified number of weekly movements of a specified ticker
@@ -35,67 +31,144 @@ public class Stats {
 	 * @param weeks
 	 * @return
 	 * @throws IOException
+	 * @throws ParseException 
 	 */
-	public ArrayList<Double> getWeeklyMovementArray(String ticker, int weeks) throws IOException {
+	public ArrayList<Double> getWeeklyMovementArray(String ticker, int weeks) throws IOException, ParseException {
+		HistoricalData hd = new HistoricalData();
 		double weeklyMovement = 0;
 		ArrayList<Double> allWeeklyMovement = new ArrayList<>(); //ArrayList of all the weekly movements
 		
 		double[] prices; //array containing the last X prices
-		double fridayClose = 0; //Friday close
-		double mondayClose = 0; //Monday close
+		double lastDayOfWeekClose = 0; //last day of the week close. Friday most of the time unless the market is closed
+		double firstDayOfWeekClose = 0; //first day of the week. Monday most of the time unless the market is closed
 		double weeklyDifference = 0; //Friday - Monday difference
 
 		LocalDate currentDate = LocalDate.now(); //current date
 		DayOfWeek currentDayOfWeek = currentDate.getDayOfWeek(); //current day of week (ENUM DayOfWeek object)
 		String currentDayOfWeekString = currentDayOfWeek.toString(); //string version of day of week
 		
-		int offset = 0;		
-		int days = weeks * 5;
+		/* offset is used to get full weeks. For example if current date is Friday that's fine we can do Fri - Mon
+		 * but if the current date is thursday then we have to have an offset so it starts counting the weeks starting
+		 * from last friday and last monday since current week has no friday
+		 */
+		int offset = 0;	
 		
-		HistoricalData hd = new HistoricalData();
+		/*
+		 * openDays is so that we can account for days where the market is closed. If today is friday but the market
+		 * is closed, then we have to use last week's data and so on. 
+		 * 
+		 * If today is Wednesday but the market was closed on last week Thursday, then we have to get the friday minus monday
+		 * so we can't just increment by 4, we'd have to increment by 3 for that one week.
+		 * 
+		 * add extra validation for each for loop that checks the amount of closed days during that fri - mon week
+		 * depending on how many there are, subtract that amount from 4... the prices[i+4] logic should be turned into a
+		 * prices[i+openMarketDays] logic
+		 * 
+		 * maybe can use https://www.nasdaqtrader.com/Trader.aspx?id=Calendar to see all the closed days. Early closes are okay.
+		 * maybe we can hard code it for 2019 for now and fix it later?
+		 * 
+		 * 2019 closed days --->
+		 * 010119	012119	021819	041919	052719	070419	090219	112819	122519
+		 * 
+		 */
+		int closedMarketDays = 0;
+		
+		
 
+		int days = weeks * 5;
+
+		/*
+		 * ---------------------------------------------------------------------------------------------------------------------------
+		 * the variables fridayClose and mondayClose won't always be friday and monday but rather the last and first day of the week
+		 * rename them
+		 * ---------------------------------------------------------------------------------------------------------------------------
+		 */
 		switch(currentDayOfWeekString) {
 		
 		//if it's sunday, the array will have Friday as date at index 0 since Sunday (and Saturday) are not trading days
 		case "SUNDAY": offset = 0; 
 		//instantiate the LocalDate[] objects after we get the max amount of days we need to cover the amount of weeks the user is asking for
 		prices = hd.getAdjClosePrice(ticker, days + offset); 
-		if(days + offset > prices.length) {
-			weeks = prices.length / 5;
-			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
-		}
-		for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
-			fridayClose = prices[i]; //get Friday close price... which will be at the offset index
-			if(i + 4 >= prices.length) {
-				break;
-			}
-			mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
-			weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
-			weeklyMovement = (weeklyDifference / mondayClose) * 100; //the movement amount in a percentage
-			allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
-			
-		}
-		break;
-		
-		case "SATURDAY": offset = 0; //see above
-		prices = hd.getAdjClosePrice(ticker, days + offset); 
 		//sometimes we can't get the amount of weeks requested because of the way the historical data class is set up
-		//it's due to some rows not having the adjusted closing price which reduces the length of the array
+		//it's due to some rows not having the adjusted closing price (dividends?) which reduces the length of the array
 		//this is why prices.length is used in the for loop.
 		//this message lets the user know we were only able to get X amount of rows
 		if(days + offset > prices.length) {
 			weeks = prices.length / 5;
 			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
 		}
-		for(int i = offset; i < prices.length; i += 5) { 
-			fridayClose = prices[i]; 
+		for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
+			lastDayOfWeekClose = prices[i]; //get Friday (or last day of week) close price... which will be at the offset index
 			if(i + 4 >= prices.length) { //break out of loop if we reach scenario mentioned in above if statement
 				break;
 			}
-			mondayClose = prices[i+4]; 
-			weeklyDifference = fridayClose - mondayClose; 
-			weeklyMovement = (weeklyDifference / mondayClose) * 100; 
-			allWeeklyMovement.add(weeklyMovement); 
+			//instead of i+4 it should be i+marketDaysOpen. Add validation here inside the for loop?
+			firstDayOfWeekClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
+			weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose; //difference between last - first day of week close (typically fri - mon)
+			weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100; //the movement amount in a percentage
+			allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
+			
+		}
+		break;
+		
+		case "SATURDAY": offset = 0; //see above
+		prices = hd.getAdjClosePrice(ticker, days + offset);
+		//******************************************************************************************************************************
+		LocalDate[] dates = hd.getDates(ticker, days + offset);
+		//******************************************************************************************************************************
+		if(days + offset > prices.length) {
+			weeks = prices.length / 5;
+			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
+		}
+		for(int i = offset; i < prices.length; i += (5-closedMarketDays)) { 
+			lastDayOfWeekClose = prices[i]; 
+			closedMarketDays = 0; //reset //******************
+			//******************************************************************************************************************************
+			
+			if(dates[i].getDayOfWeek().toString().equals("FRIDAY")) { //if last open day of week is Friday
+				if(dates[i+4].getDayOfWeek().toString().equals("MONDAY")) { //and if first open day of week is Monday
+					//no closed market days this week
+					firstDayOfWeekClose = prices[i+4];
+					weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose;
+					weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100;
+					allWeeklyMovement.add(weeklyMovement);
+				}
+				else if(!dates[i+4].getDayOfWeek().toString().equals("MONDAY")) { //if first open day of week is not Monday
+					//get the next Friday's index, which should be at most 4 out
+					int indexOfOpenMarketDayAfterLastFriday = 0;
+					for(int x = 0; i < 4; i++) {
+						if(dates[x].getDayOfWeek().toString().equals("FRIDAY")) {
+							indexOfOpenMarketDayAfterLastFriday = x - 1; //get the index before the previous Friday, which is the first open day of week
+						}
+					}
+					firstDayOfWeekClose = prices[i + indexOfOpenMarketDayAfterLastFriday];
+				}
+				
+			}
+			else if(!dates[i].getDayOfWeek().toString().equals("FRIDAY")) { //if last open day of week is NOT Friday
+				if(dates[i].getDayOfWeek().toString().equals("THURSDAY")) {
+					
+				}
+				if(dates[i].getDayOfWeek().toString().equals("WEDNESDAY")) {
+					
+				}
+				if(dates[i].getDayOfWeek().toString().equals("TUESDAY")) {
+					
+				}
+				if(dates[i].getDayOfWeek().toString().equals("MONDAY")) {
+					closedMarketDays = 4;
+				}
+			}
+			
+			
+			//******************************************************************************************************************************
+//			if(i + 4 >= prices.length) { 
+//				break;
+//			}
+//			firstDayOfWeekClose = prices[i+4]; 
+//			weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose; 
+//			weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100; 
+//			allWeeklyMovement.add(weeklyMovement); 
 			
 			
 		}
@@ -110,13 +183,13 @@ public class Stats {
 			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
 		}
 		for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
-			fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+			lastDayOfWeekClose = prices[i]; //get Friday close price... which will be at the offset index
 			if(i + 4 >= prices.length) {
 				break;
 			}
-			mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
-			weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
-			weeklyMovement = (weeklyDifference / mondayClose) * 100; //the movement amount in a percentage
+			firstDayOfWeekClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
+			weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose; //difference between Friday and Monday close
+			weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100; //the movement amount in a percentage
 			allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
 			
 		}
@@ -131,13 +204,13 @@ public class Stats {
 			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
 		}
 		for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
-			fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+			lastDayOfWeekClose = prices[i]; //get Friday close price... which will be at the offset index
 			if(i + 4 >= prices.length) {
 				break;
 			}
-			mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
-			weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
-			weeklyMovement = (weeklyDifference / mondayClose) * 100; //the movement amount in a percentage
+			firstDayOfWeekClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
+			weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose; //difference between Friday and Monday close
+			weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100; //the movement amount in a percentage
 			allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
 			
 		}
@@ -150,13 +223,13 @@ public class Stats {
 			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
 		}
 		for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
-			fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+			lastDayOfWeekClose = prices[i]; //get Friday close price... which will be at the offset index
 			if(i + 4 >= prices.length) {
 				break;
 			}
-			mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
-			weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
-			weeklyMovement = (weeklyDifference / mondayClose) * 100; //the movement amount in a percentage
+			firstDayOfWeekClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
+			weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose; //difference between Friday and Monday close
+			weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100; //the movement amount in a percentage
 			allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
 			
 		}
@@ -169,13 +242,13 @@ public class Stats {
 			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
 		}
 		for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
-			fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+			lastDayOfWeekClose = prices[i]; //get Friday close price... which will be at the offset index
 			if(i + 4 >= prices.length) {
 				break;
 			}
-			mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
-			weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
-			weeklyMovement = (weeklyDifference / mondayClose) * 100; //the movement amount in a percentage
+			firstDayOfWeekClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
+			weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose; //difference between Friday and Monday close
+			weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100; //the movement amount in a percentage
 			allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
 			
 		}
@@ -188,13 +261,13 @@ public class Stats {
 			System.out.println("We were only able to retrieve the last " + weeks + " weeks of data. \n");
 		}
 		for(int i = offset; i < prices.length; i += 5 ) { //increment by 5 at end to get next week
-			fridayClose = prices[i]; //get Friday close price... which will be at the offset index
+			lastDayOfWeekClose = prices[i]; //get Friday close price... which will be at the offset index
 			if(i + 4 >= prices.length) {
 				break;
 			}
-			mondayClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
-			weeklyDifference = fridayClose - mondayClose; //difference between Friday and Monday close
-			weeklyMovement = (weeklyDifference / mondayClose) * 100; //the movement amount in a percentage
+			firstDayOfWeekClose = prices[i+4]; //get Monday close price... which will be 4 indices ahead of Friday index
+			weeklyDifference = lastDayOfWeekClose - firstDayOfWeekClose; //difference between Friday and Monday close
+			weeklyMovement = (weeklyDifference / firstDayOfWeekClose) * 100; //the movement amount in a percentage
 			allWeeklyMovement.add(weeklyMovement); //add the weekly movement to the array list containing all weekly movements
 			
 		}
@@ -257,8 +330,9 @@ public class Stats {
 	 * @param threshold
 	 * @return
 	 * @throws IOException
+	 * @throws ParseException 
 	 */
-	public double getFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException { 
+	public double getFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException, ParseException { 
 		threshold = Math.abs(threshold);
 		
 		double failureRate = 0;
@@ -290,8 +364,9 @@ public class Stats {
 	 * @param threshold (the percentage)
 	 * @return
 	 * @throws IOException
+	 * @throws ParseException 
 	 */
-	public double getSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException { 
+	public double getSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException, ParseException { 
 		threshold = Math.abs(threshold);
 		
 		double successRate = 0;
@@ -311,8 +386,9 @@ public class Stats {
 	 * @param threshold
 	 * @return
 	 * @throws IOException
+	 * @throws ParseException 
 	 */
-	public double getPositiveMovementSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException {
+	public double getPositiveMovementSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException, ParseException {
 		if(threshold == 0) {
 			System.out.println("Please enter a non-zero threshold percentage");
 			
@@ -353,7 +429,7 @@ public class Stats {
 	}
 	
 	//create method for positive movement failureRate (staying within +X% / +N)
-	public double getPositiveMovementFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException {
+	public double getPositiveMovementFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException, ParseException {
 		double positiveFailureRate = 0;
 		
 		positiveFailureRate = 100 - getPositiveMovementSuccessRateWithinThreshold(ticker, weeks, threshold);
@@ -364,7 +440,7 @@ public class Stats {
 	
 	
 	//create method for negative movement successRate (staying within -X% / -N)
-	public double getNegativeMovementSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException{
+	public double getNegativeMovementSuccessRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException, ParseException{
 		if(threshold == 0) {
 			System.out.println("Please enter a non-zero threshold percentage");
 			
@@ -407,7 +483,7 @@ public class Stats {
 	
 	
 	//create method for negative movement failureRate (staying within -X% / -N)
-	public double getNegativeMovementFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException{
+	public double getNegativeMovementFailureRateWithinThreshold(String ticker, int weeks, double threshold) throws IOException, ParseException{
 		double negativeFailureRate = 0;
 		
 		negativeFailureRate = 100 - getNegativeMovementSuccessRateWithinThreshold(ticker, weeks, threshold);
